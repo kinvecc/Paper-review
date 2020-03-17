@@ -1,6 +1,6 @@
-# È«¾ÖÅäÖÃ
+# å…¨å±€é…ç½®
 server:
-  # ¶Ë¿Ú
+  # ç«¯å£
   port: 9001
   tomcat:
     uri-encoding: UTF-8
@@ -8,22 +8,22 @@ server:
     min-spare-threads: 30
 spring:
   resources:
-    #¾²Ì¬×ÊÔ´µØÖ·
+    #é™æ€èµ„æºåœ°å€
     static-locations: classpath:/static/,classpath:/static/upload/
-    # orm¿ò¼ÜÅäÖÃ
+    # ormæ¡†æ¶é…ç½®
   jpa:
     show-sql: true
     open-in-view: true
-    #Êı¾İÔ´ÅäÖÃ
+    #æ•°æ®æºé…ç½®
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/papers_recheck?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: root
-    #ÅäÖÃÇëÇóÁ¬½Ó
+    #é…ç½®è¯·æ±‚è¿æ¥
   elasticsearch:
     rest:
       uris: 47.105.156.64:9200
-  #ÅäÖÃ¶ÔÏóÁ¬½Ó
+  #é…ç½®å¯¹è±¡è¿æ¥
 elasticsearch:
   ip: 47.105.156.64:9200
