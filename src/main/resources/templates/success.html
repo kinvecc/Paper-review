@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html class="x-admin-sm" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{/css/xadmin.css}">
+    <script charset="utf-8" th:src="@{/js/jquery.min.js}" type="text/javascript"></script>
+    <script charset="utf-8" th:src="@{/layui/layui.js}" type="text/javascript"></script>
+    <style>
+        .layui-layer-dialog {
+            top: 40px !important;
+        }
+    </style>
+</head>
+<body>
+<!--<div style="margin: 30px auto; text-align: center">
+    上传成功！<span id="time">3</span>s后跳回<a target="_top" th:href="@{/index}">首页</a>
+</div>-->
+</body>
+<script th:inline="javascript">
+    /*var time = 4;
+    setInterval(function () {
+        $("#time").text(time);
+        time--;
+        if (time === 0) {
+            top.location.href = "/index";
+        }
+    }, 1000);*/
+    var IS_SYSTEM = sessionStorage.getItem("IS_SYSTEM");
+
+    if (IS_SYSTEM) {
+        top.location.href = "/index";
+    } else {
+        console.info([[${userPaperList}]]);
+        console.info([[${systemPaperList}]]);
+
+        layui.use(['layer'], function () {
+            var layer = layui.layer;
+            layer.confirm("是否下载论文检测报告？", function () {
+                console.info("id:" + [[${id}]]);
+                var id = [[${id}]];
+                window.open('/paper/downloadReport?id=' + id);
+                // document.location.href = ;
+                top.location.href = "/index";
+            }, function () {
+                top.location.href = "/index";
+            });
+        });
+
+    }
+</script>
+</html>

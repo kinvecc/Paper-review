@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html class="x-admin-sm" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>上传论文</title>
+    <meta content="webkit" name="renderer">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" name="viewport"/>
+    <link rel="stylesheet" th:href="@{/css/xadmin.css}">
+    <link rel="stylesheet" th:href="@{/css/font.css}">
+    <script charset="utf-8" th:src="@{/js/jquery.min.js}" type="text/javascript"></script>
+    <script charset="utf-8" th:src="@{/layui/layui.js}" type="text/javascript"></script>
+    <script charset="utf-8" th:src="@{/js/xadmin.js}" type="text/javascript"></script>
+    <script charset="utf-8" th:src="@{/js/vue.js}" type="text/javascript"></script>
+</head>
+
+<body>
+<div class="layui-fluid">
+    <div class="layui-row" id="addPaper">
+        <!--        <form class="layui-form" action="/paper/addPaper" method="post" enctype="multipart/form-data">-->
+        <form id="formAdd" class="layui-form" enctype="multipart/form-data" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="paperName">
+                    <span class="x-red">*</span>论文名称
+                </label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline layui-show-xs-block">
+                        <input class="layui-input" id="paperName" lay-verify="required" name="paperName" type="text">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="paperType">
+                    <span class="x-red">*</span>论文类型
+                </label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline layui-show-xs-block">
+                        <select id="paperType" name="paperType">
+                            <option th:each="paper,index : ${session.PAPER_TYPE_LIST}" th:value="${paper.typeId}">[[${paper.typeName}]]</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="paperFile">
+                    <span class="x-red">*</span>论文文件
+                </label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline layui-show-xs-block" style="margin-top: 7px">
+                        <input class="" id="paperFile" lay-verify="required" name="paperFile" type="file">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">上传论文</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script charset="UTF-8" type="text/javascript">
+    var IS_SYSTEM = sessionStorage.getItem("IS_SYSTEM");
+
+    if (IS_SYSTEM){
+        $("#formAdd").prop("action", "/paper/addPaper?isSystem=true")
+    }else{
+        $("#formAdd").prop("action", "/paper/addPaper?isSystem=false")
+    }
+
+    layui.use(['form', 'layer'],
+        function () {
+            var form = layui.form,
+                layer = layui.layer;
+            /*
+            if (IS_SYSTEM) {
+                paper.isSystem = true;
+            } else {
+                paper.isSystem = false;
+            }*/
+
+            //监听提交
+            /*form.on('submit(add)',
+                function (data) {
+
+                    var formData = new FormData();
+                    formData.append("file", document.getElementById("paperFile").files[0]);
+                    formData.append("paperName", data.field.paperName);
+                    formData.append("paperType", data.field.paperType);
+                    // formData.append("isSystem", !!IS_SYSTEM);
+
+                    console.info(formData);
+                    alert(JSON.stringify(formData));
+                    //发异步，把数据提交给java
+                    $.ajax({
+                        url: "/paper/addPaper",
+                        data: formData,
+                        /!**
+                         *必须false才会自动加上正确的Content-Type
+                         *!/
+                        contentType: false,
+                        /!**
+                         * 必须false才会避开jQuery对 formdata 的默认处理
+                         * XMLHttpRequest会对 formdata 进行正确的处理
+                         *!/
+                        processData: false,
+                        type: "post",
+                        dataType: "json",
+                        success: function (result) {
+                            if (result.code === 200) {
+                                layer.msg("增加成功", {icon: 6, time: 500},
+                                    function () {
+                                        //关闭当前frame
+                                        xadmin.close();
+                                        // 可以对父窗口进行刷新
+                                        xadmin.father_reload();
+                                    });
+                            } else {
+                                layer.alert(result.msg);
+                            }
+                        }
+                    });
+
+                    return false;
+                });*/
+
+        });
+    /*jQuery.ajaxSetup({
+        timeout: 6000,
+        xhrFields: {
+            withCredentials: true //允许带上凭据
+        },
+        crossDomain: true
+    });*/
+    /*
+          vm = new Vue({
+              el: "#addPaper",
+              data: {
+              },
+              methods: {
+                  /!*addPaper: function () {
+                      var nname = $("[name=nname]").val();
+                      var n = this.addnew;
+                      n.nname = nname;
+                      $.ajax({
+                          type: "post",
+                          url: "http://127.0.0.1:8080/admin/addnews",
+                          data: JSON.stringify(n),
+                          dataType: "json",
+                          contentType: "application/json", //非常重要
+                          success: function (data) {
+                              if (data.code == 200) {
+                                  alert("新增成功");
+                              } else {
+                                  alert("新增失败");
+                              }
+                          }
+                      });
+                  }*!/
+              },
+              created: function () {
+
+              }
+          });*/
+</script>
+</body>
+
+</html>
