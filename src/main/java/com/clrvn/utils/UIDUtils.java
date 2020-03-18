@@ -3,7 +3,7 @@ package com.clrvn.utils;
 import java.util.UUID;
 
 /**
- * @author 陈振华
+ * @author Clrvn
  */
 public class UIDUtils {
 

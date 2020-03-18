@@ -113,7 +113,6 @@ public class PoiWordController {
         try {
             FileUtil.uploadFile(file.getBytes(), fileName);
         } catch (Exception e) {
-            // TODO: handle exception
         }
         //返回json
         return "upload success";
