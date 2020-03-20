@@ -58,7 +58,6 @@ public class CosineSimilarityUtil {
      * @return 11种分词结果叠加
      */
     private List<String> splitAndFilterStr(String content) {
-        System.err.println(content);
         return SegmentationAlgorithmUtil.segmentationAlgorithm(content);
     }
 
@@ -152,6 +151,21 @@ public class CosineSimilarityUtil {
      */
     public Map<String, BigInteger> getMap() {
         return this.myMap == null ? new HashMap<>(0) : new HashMap<>(this.myMap);
+    }
+
+    /**
+     * 计算两个字符串的相似度
+     *
+     * @param str1 字符1
+     * @param str2 字符2
+     * @return 相似度
+     */
+    public static double similarity(String str1, String str2) {
+
+        CosineSimilarityUtil text1 = new CosineSimilarityUtil(str1);
+        CosineSimilarityUtil text2 = new CosineSimilarityUtil(str2);
+
+        return text1.similarityRatio(text2.getMap());
     }
 
 }

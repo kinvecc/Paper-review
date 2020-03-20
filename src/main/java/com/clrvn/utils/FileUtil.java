@@ -23,8 +23,8 @@ import java.util.Map;
 @SuppressWarnings("all")
 public class FileUtil {
 
-    //写一个默认的路径，也就是项目布置的static下面的upload中，当然你也可以换成你本地的D:\下面任意一个文件夹下面
-    public static final String UPLOAD_PATH = "D:\\IJ-idea\\mywork\\Papers Rechecking\\src\\main\\resources\\static\\upload\\";
+    //默认的路径是项目布置的static下面的upload中，当然你也可以换成你本地的D:\下面任意一个文件夹下面
+    public static final String UPLOAD_PATH = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\upload\\";
 
     /**
      * 以行为单位读取文件，常用于读面向行的格式化文件
@@ -144,7 +144,6 @@ public class FileUtil {
                 WordExtractor wordExtractor = new WordExtractor(fis);
                 //获取段落内容
                 for (String words : wordExtractor.getParagraphText()) {
-                    System.err.println(words);
                     wordList.add(words);
                 }
                 fis.close();

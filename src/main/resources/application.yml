@@ -27,3 +27,10 @@ spring:
   #配置对象连接
 elasticsearch:
   ip: 47.105.156.64:9200
+
+#配置相似度
+similarity:
+  #一个段落80%相似即为重复
+  paragraph: 0.8
+  #整个文件30%意味着查重率不通过
+  file: 0.3

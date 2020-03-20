@@ -71,6 +71,7 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <!--中文分词框架——word -->
         <dependency>
             <groupId>org.apdplat</groupId>
             <artifactId>word</artifactId>
@@ -99,10 +100,15 @@
             <artifactId>spire.pdf</artifactId>
             <version>2.2.0</version>
         </dependency>-->
-        <dependency>
+        <!--<dependency>
             <groupId> e-iceblue </groupId>
             <artifactId>spire.doc</artifactId>
             <version>2.2.0</version>
+        </dependency>-->
+        <dependency>
+            <groupId> e-iceblue </groupId>
+            <artifactId>spire.doc.free</artifactId>
+            <version>2.7.3</version>
         </dependency>
     </dependencies>
 

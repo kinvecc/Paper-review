@@ -1,21 +1,24 @@
 package com.clrvn.controller;
 
 import com.clrvn.utils.FileUtil;
+import com.spire.doc.Document;
+import com.spire.doc.FileFormat;
 import org.apache.poi.POIXMLDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.springframework.stereotype.Controller;
+import org.springframework.boot.system.ApplicationHome;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,9 +30,8 @@ import java.util.Map;
  * @className PoiWordController
  * @date 2019-05-16 14:39
  */
-@Controller
+@RestController
 @RequestMapping("/poiWord")
-@SuppressWarnings("all")
 public class PoiWordController {
 
     /**
@@ -41,11 +43,10 @@ public class PoiWordController {
      */
 //  @ApiOperation(value = "解析word文档", notes = "按段落解析word文档")
     @PostMapping(value = "upload")
-    @ResponseBody
-    public Map uploadFile(@RequestParam(value = "file") MultipartFile file) {
+    public Map<String, String> uploadFile(@RequestParam(value = "file") MultipartFile file) {
         String textFileName = file.getOriginalFilename();
         //创建一个map对象存放word中的内容
-        Map wordMap = new LinkedHashMap();
+        Map<String, String> wordMap = new LinkedHashMap<>();
         try {
             //判断文件格式
             assert textFileName != null;
@@ -100,7 +101,6 @@ public class PoiWordController {
      * @return
      */
     @PostMapping(value = "/uploadPaper")
-    @ResponseBody
     public String uploadPaper(@RequestParam("file") MultipartFile file,
                               HttpServletRequest request) {
 
@@ -116,5 +116,12 @@ public class PoiWordController {
         }
         //返回json
         return "upload success";
+    }
+
+    @PostMapping(value = "test")
+    public String testUploadFile(@RequestParam(value = "file") MultipartFile file) throws IOException {
+        Document document = new Document(file.getInputStream());
+        document.saveToFile(FileUtil.UPLOAD_PATH + "上传" + System.currentTimeMillis() + ".docx", FileFormat.Docx);
+        return "yes";
     }
 }

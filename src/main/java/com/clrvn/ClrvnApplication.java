@@ -1,24 +1,15 @@
 package com.clrvn;
 
-import com.clrvn.utils.FileUtil;
-import com.spire.doc.Document;
-import com.spire.doc.FileFormat;
-import com.spire.doc.documents.TextSelection;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.awt.*;
-import java.io.File;
-import java.util.List;
-import java.util.UUID;
-
-//@SpringBootApplication
+@SpringBootApplication
 public class ClrvnApplication {
 
     public static void main(String[] args) {
-//        SpringApplication.run(ClrvnApplication.class, args);
+        SpringApplication.run(ClrvnApplication.class, args);
 
-        //加载Word文档
+        /*//加载Word文档
         Document document = new Document("aaa.doc");
         //查找所有需要高亮的文本
 
@@ -43,7 +34,7 @@ public class ClrvnApplication {
         System.out.println("备注： " + document.getBuiltinDocumentProperties().getComments());
 
         List<String> strings = FileUtil.readFileByLines(fileName);
-        System.err.println(strings.remove(0));
+        System.err.println(strings.remove(0));*/
     }
 
 }

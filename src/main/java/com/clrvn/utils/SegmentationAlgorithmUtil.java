@@ -15,6 +15,9 @@ import java.util.List;
  */
 public class SegmentationAlgorithmUtil {
 
+    /**
+     * 分割方法
+     */
     private static List<String> seg(String text, SegmentationAlgorithm segmentationAlgorithm) {
         List<String> stringList = new ArrayList<>();
         for (Word word : WordSegmenter.segWithStopWords(text, segmentationAlgorithm)) {
@@ -23,6 +26,9 @@ public class SegmentationAlgorithmUtil {
         return stringList;
     }
 
+    /**
+     * 把文本以word分词算法进行分割
+     */
     public static List<String> segmentationAlgorithm(String text) {
         List<String> stringList = new ArrayList<>();
         for (SegmentationAlgorithm segmentationAlgorithm : SegmentationAlgorithm.values()) {
