@@ -16,7 +16,7 @@ spring:
     open-in-view: true
     #数据源配置
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/papers_recheck?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
+    url: jdbc:mysql://127.0.0.1:3306/paper_review?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: root

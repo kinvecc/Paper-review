@@ -61,7 +61,7 @@ public class RecheckingUtil {
      * @param str2 字符2
      * @return 相似度
      */
-    public static double similarity(String str1, String str2) {
+    private static double similarity(String str1, String str2) {
 
         CosineSimilarityUtil text1 = new CosineSimilarityUtil(str1);
         CosineSimilarityUtil text2 = new CosineSimilarityUtil(str2);
