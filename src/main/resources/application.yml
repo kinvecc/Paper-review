@@ -30,7 +30,7 @@ elasticsearch:
 
 #配置相似度
 similarity:
-  #一个段落80%相似即为重复
-  paragraph: 0.8
+  #一个段落60%相似即为重复
+  paragraph: 0.6
   #整个文件30%意味着查重率不通过
   file: 0.3

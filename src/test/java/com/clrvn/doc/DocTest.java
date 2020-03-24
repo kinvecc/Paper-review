@@ -4,15 +4,20 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
 import com.alibaba.fastjson.JSON;
 import com.clrvn.ClrvnApplicationTests;
+import com.clrvn.domain.DocumentContent;
+import com.clrvn.domain.ParagraphContent;
+import com.clrvn.domain.SectionContent;
 import com.clrvn.utils.CosineSimilarityUtil;
 import com.clrvn.utils.FileUtil;
 import com.clrvn.utils.RecheckingUtil;
+import com.clrvn.utils.SegmentationAlgorithmUtil;
 import com.spire.doc.Document;
 import com.spire.doc.FileFormat;
 import com.spire.doc.Section;
 import com.spire.doc.collections.SectionCollection;
 import com.spire.doc.documents.Paragraph;
 import com.spire.doc.documents.TextSelection;
+import com.spire.doc.fields.TextRange;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -54,7 +59,7 @@ class DocTest extends ClrvnApplicationTests {
     }
 
     @Test
-    void signText(){
+    void signText() {
 
 
     }
@@ -215,8 +220,109 @@ class DocTest extends ClrvnApplicationTests {
     void editDoc() {
         //得到结果之后，再编辑文档
         Document uploadDoc = new Document("花木兰.docx");
-        uploadDoc.getSections().get(0).getParagraphs().get(0).find("木兰", false, false)
-                .getAsOneRange().getCharacterFormat().setHighlightColor(Color.YELLOW);
+        TextRange[] textRanges = uploadDoc.getSections().get(0).getParagraphs().get(0).find("木兰", false, false)
+                .getRanges();
+        for (TextRange textRange : textRanges) {
+            textRange.getCharacterFormat().setHighlightColor(Color.YELLOW);
+        }
+
         uploadDoc.saveToFile("编辑" + System.currentTimeMillis() + ".docx", FileFormat.Docx);
+    }
+
+    @Test
+    void DocumentContentTest() {
+
+        Document uploadDoc = new Document("哈哈.docx");
+
+        DocumentContent documentContent = new DocumentContent(uploadDoc);
+
+        documentContent.signText(0, 0, Collections.singletonList("千鸟飞山头ABC跟他一起"), Color.yellow);
+
+        documentContent.getDocument().saveToFile("哈哈" + System.currentTimeMillis() + ".docx", FileFormat.Docx);
+    }
+
+    @Test
+    void compareTwoDocument() {
+        Document uploadDoc = new Document("花木兰.docx");
+        Document data1Doc = new Document("花木兰1.docx");
+        Document data2Doc = new Document("花木兰2.docx");
+
+        DocumentContent uploadContent = new DocumentContent(uploadDoc);
+        DocumentContent data1Content = new DocumentContent(data1Doc);
+        DocumentContent data2Content = new DocumentContent(data2Doc);
+
+        List<DocumentContent> dataContentList = new ArrayList<>(Arrays.asList(data1Content, data2Content));
+
+        Map<int[], List<String>> result = new HashMap<>();
+
+        List<SectionContent> sectionContents = uploadContent.getSectionContents();
+        for (int i = 0, sectionContentsSize = sectionContents.size(); i < sectionContentsSize; i++) {
+            SectionContent sectionContent = sectionContents.get(i);
+            List<ParagraphContent> paragraphs = sectionContent.getParagraphs();
+            for (int j = 0, paragraphsSize = paragraphs.size(); j < paragraphsSize; j++) {
+                ParagraphContent paragraphContent = paragraphs.get(j);
+                String text = paragraphContent.getText();
+                int sectionNum = i;
+                int paragraphNum = j;
+                dataContentList.forEach(dataContent -> {
+                    dataContent.getSectionContents().forEach(sectionContent1 -> {
+                        sectionContent1.getParagraphs().forEach(paragraph -> {
+                            //如果相似度大于配置里面段落的相似度
+                            String otherText = paragraph.getText();
+                            if (CosineSimilarityUtil.similarity(text, otherText) > paragraphSimilarity) {
+                                int[] key = new int[2];
+                                key[0] = sectionNum;
+                                key[1] = paragraphNum;
+
+                                List<String> values = result.get(key);
+
+                                //如果上传的那一行数据还是第一次匹配，所以values为空
+                                if (CollUtil.isEmpty(values)) {
+                                    values = new ArrayList<>();
+                                    //添加进去
+                                    values.add(otherText);
+                                    result.put(key, values);
+                                }else{
+                                    values.add(otherText);
+                                }
+                            }
+                        });
+                    });
+                });
+
+            }
+        }
+
+        System.err.println(JSON.toJSONString(result));
+        //标色
+        for (Map.Entry<int[], List<String>> entry : result.entrySet()) {
+            int[] key = entry.getKey();
+            uploadContent.signText(key[0], key[1], entry.getValue(), Color.yellow);
+        }
+
+        uploadContent.getDocument().saveToFile("完结"+System.currentTimeMillis()+".docx", FileFormat.Docx);
+
+        int size = result.keySet().size();
+        int paragraphNum = uploadContent.getParagraphNum();
+        double ratio = (double)size /paragraphNum;
+        System.out.println("查重率：" + ratio);
+    }
+
+
+    @Test
+    public void intersection(){
+
+//        String str1 = "臣本布衣，躬耕于南阳";
+//        String str2 = "我本靓仔，躬耕在咸阳";
+        String str1 = "万里赴戎机百，军事气传金析，将军自菲薄，壮士十年归。";
+        String str2 = "万里赴戎机，关山度若飞。朔气传金析，寒光照铁衣。将军百战死，壮士十年归。";
+        List<String> str1List = SegmentationAlgorithmUtil.segmentationAlgorithm(str1);
+        List<String> str2List = SegmentationAlgorithmUtil.segmentationAlgorithm(str2);
+
+        str1List.forEach(System.out::println);
+        str2List.forEach(System.err::println);
+        Collection<String> intersection = CollUtil.intersection(str1List, str2List);
+
+        CollUtil.distinct(intersection).forEach(System.out::println);
     }
 }
