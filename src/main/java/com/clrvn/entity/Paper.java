@@ -16,24 +16,16 @@ public class Paper implements Serializable, Cloneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
+    private String author;
     private String paperName;
-
-    private Integer paperType;
-
+    private String keyword;
     private String paperPath;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    private String reportPath;
-
-    private boolean isSystem;
-
+    private String returnPath;
+    private Integer pageView;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date createTime;
+    private Date uploadTime;
 
     public Paper() {
         super();

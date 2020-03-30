@@ -1,6 +1,5 @@
 package com.clrvn.controller;
 
-import com.clrvn.constant.PaperTypeConstant;
 import com.clrvn.entity.Paper;
 import com.clrvn.entity.User;
 import com.clrvn.enums.ResultFailureEnum;
@@ -163,13 +162,13 @@ public class PaperController {
         return ResponseUtils.buildResponseEntity(file, paper.getPaperName() + "的论文报告.txt");
     }
 
-    /**
+    /* *//**
      * 下载系统论文
      *
      * @param id
      * @return
      * @throws IOException
-     */
+     *//*
     @GetMapping("/downloadSystem")
     public ResponseEntity<byte[]> downloadSystem(@RequestParam("id") Integer id) throws IOException {
         Paper paper = paperService.getOneById(id);
@@ -189,5 +188,7 @@ public class PaperController {
             paperTypeName = "电子";
         }
         return ResponseUtils.buildResponseEntity(file, paperTypeName + "系统论文.doc");
-    }
+    }*/
+
+
 }
