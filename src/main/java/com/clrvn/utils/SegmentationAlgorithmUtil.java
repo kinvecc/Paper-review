@@ -11,7 +11,6 @@ import java.util.List;
  * @author Clrvn
  * @description 分割算法工具类
  * @className SegmentationAlgorithmUtil
- * @date 2019-05-22 1:50
  */
 public class SegmentationAlgorithmUtil {
 

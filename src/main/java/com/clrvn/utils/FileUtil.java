@@ -18,7 +18,6 @@ import java.util.Map;
  * @author Clrvn
  * @description 文件读写工具类
  * @className FileUtil
- * @date 2019-04-26 10:36
  */
 @SuppressWarnings("all")
 public class FileUtil {
@@ -39,7 +38,6 @@ public class FileUtil {
         BufferedReader reader = null;
         try {
 
-//			reader = new BufferedReader(new FileReader(file));
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
 
             String tempString = null;
@@ -53,9 +51,7 @@ public class FileUtil {
             reader.close();
 
         } catch (IOException e) {
-
             e.printStackTrace();
-
         } finally {
 
             if (reader != null) {

@@ -13,7 +13,6 @@ import java.net.URLEncoder;
 /**
  * @Description: 文件下载工具类
  * @Author: 刘炜程
- * @Date: 2019-01-06 15:53
  */
 @SuppressWarnings("all")
 public class ResponseUtils {

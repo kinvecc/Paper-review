@@ -23,7 +23,6 @@ public class EsRestClient {
         HttpHost httpHost = new HttpHost(ip, port, "http");
         return new RestHighLevelClient(RestClient.builder(httpHost));
 
-
     }
 
 }

@@ -13,7 +13,6 @@ import java.util.UUID;
 /**
  * @author Clrvn
  * @description 高亮doc文档测试
- * @date 2020-03-19 17:37
  */
 public class SignColorTest {
 

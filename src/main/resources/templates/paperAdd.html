@@ -17,8 +17,7 @@
 <body>
 <div class="layui-fluid">
     <div class="layui-row" id="addPaper">
-        <!--        <form class="layui-form" action="/paper/addPaper" method="post" enctype="multipart/form-data">-->
-        <form id="formAdd" class="layui-form" enctype="multipart/form-data" method="post">
+        <form id="formAdd" action="/paper/uploadPaper" class="layui-form" enctype="multipart/form-data" method="post">
             <div class="layui-form-item">
                 <label class="layui-form-label" for="paperName">
                     <span class="x-red">*</span>论文名称
@@ -30,14 +29,22 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" for="paperType">
-                    <span class="x-red">*</span>论文类型
+                <label class="layui-form-label" for="author">
+                    <span class="x-red">*</span>论文作者
                 </label>
                 <div class="layui-input-block">
                     <div class="layui-input-inline layui-show-xs-block">
-                        <select id="paperType" name="paperType">
-                            <option th:each="paper,index : ${session.PAPER_TYPE_LIST}" th:value="${paper.typeId}">[[${paper.typeName}]]</option>
-                        </select>
+                        <input class="layui-input" id="author" lay-verify="required" name="author" type="text">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="keyword">
+                    <span class="x-red">*</span>关键词
+                </label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline layui-show-xs-block">
+                        <input class="layui-input" id="keyword" lay-verify="required" name="keyword" type="text">
                     </div>
                 </div>
             </div>
@@ -59,13 +66,6 @@
     </div>
 </div>
 <script charset="UTF-8" type="text/javascript">
-    var IS_SYSTEM = sessionStorage.getItem("IS_SYSTEM");
-
-    if (IS_SYSTEM){
-        $("#formAdd").prop("action", "/paper/addPaper?isSystem=true")
-    }else{
-        $("#formAdd").prop("action", "/paper/addPaper?isSystem=false")
-    }
 
     layui.use(['form', 'layer'],
         function () {

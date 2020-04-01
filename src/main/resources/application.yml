@@ -28,7 +28,7 @@ spring:
 elasticsearch:
   ip: 47.105.156.64:9200
 
-#配置相似度
+#配置相似度  这个是我现在自己配置的，到时候改这里就好
 similarity:
   #一个段落60%相似即为重复
   paragraph: 0.6

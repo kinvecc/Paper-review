@@ -17,11 +17,7 @@
         <div class="layui-col-md12">
             <div class="layui-card">
                 <div class="layui-card-body ">
-                    <blockquote class="layui-elem-quote">欢迎<span th:if="${session.USER.role == 1}">用户</span><span
-                            th:if="${session.USER.role == 2}">管理员</span>：
-                        <span class="x-red" th:text="${session.USER.username}">test</span>！<!--当前时间:[[${#dates.format(new java.util.Date().getTime(),
-                        'yyyy-MM-dd hh:mm:ss')}]]-->
-                    </blockquote>
+                    <blockquote class="layui-elem-quote">欢迎</blockquote>
                 </div>
             </div>
         </div>

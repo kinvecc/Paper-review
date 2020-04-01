@@ -7,7 +7,6 @@ import java.util.List;
  * @author Clrvn
  * @description
  * @className RecheckingUtil
- * @date 2019-05-21 23:46
  */
 public class RecheckingUtil {
 

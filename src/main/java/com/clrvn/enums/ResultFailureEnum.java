@@ -8,10 +8,6 @@ import lombok.Getter;
 
 @Getter
 public enum ResultFailureEnum {
-    /**
-     * 登录失败
-     */
-    LOGIN_ERROR(1, "登录失败"),
 
     /**
      * 删除论文失败
@@ -21,7 +17,7 @@ public enum ResultFailureEnum {
     /**
      * 删除论文失败
      */
-    ADD_PAPER_FAILURE(3, "添加论文失败"),
+    UPLOAD_PAPER_FAILURE(3, "上传论文失败"),
     ;
 
     private Integer code;

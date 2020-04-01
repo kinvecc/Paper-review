@@ -1,32 +1,37 @@
 package com.clrvn.controller;
 
+import cn.hutool.core.collection.CollUtil;
+import com.alibaba.fastjson.JSON;
+import com.clrvn.domain.DocumentContent;
+import com.clrvn.domain.ParagraphContent;
+import com.clrvn.domain.SectionContent;
 import com.clrvn.entity.Paper;
-import com.clrvn.entity.User;
 import com.clrvn.enums.ResultFailureEnum;
 import com.clrvn.exception.PaperException;
 import com.clrvn.service.IPaperService;
-import com.clrvn.utils.*;
-import com.clrvn.vo.ResultVO;
+import com.clrvn.utils.CosineSimilarityUtil;
+import com.clrvn.utils.FileUtil;
+import com.clrvn.utils.UIDUtils;
+import com.spire.doc.Document;
+import com.spire.doc.FileFormat;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpSession;
-import java.io.File;
+import java.awt.*;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
+import java.util.*;
 
 /**
  * @author Clrvn
  * @description
  * @className PaperController
- * @date 2019-05-20 23:12
  */
 @Controller
 @RequestMapping("/paper")
@@ -36,60 +41,44 @@ public class PaperController {
     @Resource
     private IPaperService paperService;
 
+    @Value("${similarity.paragraph}")
+    private Double paragraphSimilarity;
+
+    @PostMapping(value = "test")
+    public String testUploadFile(@RequestParam(value = "file") MultipartFile file) throws IOException {
+        Document document = new Document(file.getInputStream());
+        document.saveToFile(FileUtil.UPLOAD_PATH + "上传" + System.currentTimeMillis() + ".docx", FileFormat.Docx);
+        return "yes";
+    }
+
     @GetMapping("/findPaperPage")
     @ResponseBody
-    public Page<Paper> findPaperPage(HttpSession session, Integer pageIndex, Boolean isSystem) {
-
-        User user = (User) session.getAttribute("USER");
-
-        log.info("page={}", paperService.findAllByUserIdAndSystem(pageIndex, user.getId(), isSystem));
-
-        return paperService.findAllByUserIdAndSystem(pageIndex, user.getId(), isSystem);
-    }
-
-    @GetMapping("/findAllPaperPage")
-    @ResponseBody
-    public Page<Paper> findAllPaperPage(Integer pageIndex, Boolean isSystem) {
-
-        log.info("page={}", paperService.findAllBySystem(pageIndex, isSystem));
-
-        return paperService.findAllBySystem(pageIndex, isSystem);
-    }
-
-    @DeleteMapping("/removeById")
-    @ResponseBody
-    public ResultVO removeById(Integer id) {
-
-        try {
-            int count = paperService.removePaperById(id);
-            if (count > 0) {
-                return ResultVOUtil.success();
-            } else {
-                return ResultVOUtil.failure(ResultFailureEnum.REMOVE_PAPER_FAILURE);
-            }
-        } catch (Exception ex) {
-            throw new PaperException(ResultFailureEnum.REMOVE_PAPER_FAILURE);
+    public Page<Paper> findPaperPage(Integer pageIndex, String paperName) {
+        log.info("pageIndex={}, paperName={}", pageIndex, paperName);
+        log.info("page={}", paperService.findAllByPaperNameContainsOrderByPageViewDesc(pageIndex, paperName));
+        if (paperName == null){
+            paperName = "%%";
         }
-
+        return paperService.findAllByPaperNameContainsOrderByPageViewDesc(pageIndex, paperName);
     }
 
     /**
      * 处理文件上传，并算出与系统论文的比较
      *
-     * @param file    文件
-     * @param session 会话
+     * @param file 文件
      * @return 成功
      */
-    @PostMapping(value = "/addPaper")
-    public String addPaper(@RequestParam("paperFile") MultipartFile file, @RequestParam("isSystem") Boolean isSystem,
-                           @RequestParam("paperType") Integer paperType, @RequestParam("paperName") String paperName,
-                           HttpSession session, Model model) {
+    @PostMapping(value = "/uploadPaper")
+    public String uploadPaper(@RequestParam("paperFile") MultipartFile file, @RequestParam("author") String author, @RequestParam("keyword") String keyword,
+                              @RequestParam("paperName") String paperName, Model model) throws IOException {
 
+        Document uploadDoc = new Document(file.getInputStream());
+        DocumentContent uploadContent = new DocumentContent(uploadDoc);
         String fileName = file.getOriginalFilename();
 
-        System.err.println(isSystem);
+        System.err.println(keyword);
         System.err.println(paperName);
-        System.err.println(paperType);
+        System.err.println(author);
 
         if (fileName.endsWith(".doc")) {
             fileName = UIDUtils.getUId() + ".doc";
@@ -102,93 +91,89 @@ public class PaperController {
             //文件上传
             FileUtil.uploadFile(file.getBytes(), FileUtil.UPLOAD_PATH + fileName);
 
-
             //添加
             Paper paper = new Paper();
+            paper.setAuthor(author);
+            paper.setKeyword(keyword);
+            paper.setReturnPath("");
+            paper.setUploadTime(new Date());
+            paper.setPageView(0);
+
             paper.setPaperName(paperName);
-            paper.setPaperType(paperType);
             paper.setPaperPath(fileName);
-            paper.setUser((User) session.getAttribute("USER"));
-            if (isSystem) {
-                paper.setReportPath(null);
-            } else {
 
-                //用户提交的论文与系统论文进行比较
-                Paper systemPaper = paperService.getSystemPaperByType(paperType);
+            //比较
+            log.debug("================================== 正在比较...==================================  ");
+            List<Paper> allPaper = paperService.findAll();
 
-                //读取论文文件组装list
-                List<String> userPaperList = FileUtil.getListByFile(FileUtil.UPLOAD_PATH + fileName);
-                //读取论文文件组装list
-                List<String> systemPaperList = FileUtil.getListByFile(FileUtil.UPLOAD_PATH + systemPaper.getPaperPath());
+            List<DocumentContent> dataContentList = new ArrayList<>();
+            allPaper.forEach(ele -> {
+                dataContentList.add(new DocumentContent(new Document(FileUtil.UPLOAD_PATH + ele.getPaperPath())));
+            });
 
-                //论文报告list
-                List<String> reportList = RecheckingUtil.comparePaper(userPaperList, systemPaperList);
+            Map<int[], List<String>> result = new HashMap<>();
 
-                String reportPath = UIDUtils.getUId();
+            List<SectionContent> sectionContents = uploadContent.getSectionContents();
+            for (int i = 0, sectionContentsSize = sectionContents.size(); i < sectionContentsSize; i++) {
+                SectionContent sectionContent = sectionContents.get(i);
+                List<ParagraphContent> paragraphs = sectionContent.getParagraphs();
+                for (int j = 0, paragraphsSize = paragraphs.size(); j < paragraphsSize; j++) {
+                    ParagraphContent paragraphContent = paragraphs.get(j);
+                    String text = paragraphContent.getText();
+                    int sectionNum = i;
+                    int paragraphNum = j;
+                    dataContentList.forEach(dataContent -> {
+                        dataContent.getSectionContents().forEach(sectionContent1 -> {
+                            sectionContent1.getParagraphs().forEach(paragraph -> {
+                                //如果相似度大于配置里面段落的相似度
+                                String otherText = paragraph.getText();
+                                if (CosineSimilarityUtil.similarity(text, otherText) > paragraphSimilarity) {
+                                    int[] key = new int[2];
+                                    key[0] = sectionNum;
+                                    key[1] = paragraphNum;
 
-                //写入报告文件
-                FileUtil.writeFileByLines(reportList, FileUtil.UPLOAD_PATH + reportPath);
+                                    List<String> values = result.get(key);
 
-                model.addAttribute("userPaperList", userPaperList);
-                model.addAttribute("systemPaperList", systemPaperList);
-                paper.setReportPath(reportPath);
+                                    //如果上传的那一行数据还是第一次匹配，所以values为空
+                                    if (CollUtil.isEmpty(values)) {
+                                        values = new ArrayList<>();
+                                        //添加进去
+                                        values.add(otherText);
+                                        result.put(key, values);
+                                    } else {
+                                        values.add(otherText);
+                                    }
+                                }
+                            });
+                        });
+                    });
+
+                }
             }
-            paper.setSystem(isSystem);
-            paper.setCreateTime(new Date());
 
+            System.err.println(JSON.toJSONString(result));
+            //标色
+            for (Map.Entry<int[], List<String>> entry : result.entrySet()) {
+                int[] key = entry.getKey();
+                uploadContent.signText(key[0], key[1], entry.getValue(), Color.yellow);
+            }
+
+            uploadContent.getDocument().saveToFile("完结" + System.currentTimeMillis() + ".docx", FileFormat.Docx);
+
+            int size = result.keySet().size();
+            int paragraphNum = uploadContent.getParagraphNum();
+            double ratio = (double) size / paragraphNum;
+            System.out.println("查重率：" + ratio);
+            log.debug("==================================  比较完成，查重率： {} ================================== ",ratio);
             //新增
             Paper newPaper = paperService.savePaper(paper);
 
             System.err.println(newPaper.getId());
             model.addAttribute("id", newPaper.getId());
         } catch (Exception e) {
-            throw new PaperException(ResultFailureEnum.ADD_PAPER_FAILURE);
+            throw new PaperException(ResultFailureEnum.UPLOAD_PAPER_FAILURE);
         }
         return "success";
     }
-
-    /**
-     * 下载报告
-     *
-     * @param id
-     * @return
-     * @throws IOException
-     */
-    @GetMapping("/downloadReport")
-    public ResponseEntity<byte[]> downloadReport(@RequestParam("id") Integer id) throws IOException {
-        Paper paper = paperService.getOneById(id);
-        String path = FileUtil.UPLOAD_PATH + paper.getReportPath();
-        File file = new File(path);
-        return ResponseUtils.buildResponseEntity(file, paper.getPaperName() + "的论文报告.txt");
-    }
-
-    /* *//**
-     * 下载系统论文
-     *
-     * @param id
-     * @return
-     * @throws IOException
-     *//*
-    @GetMapping("/downloadSystem")
-    public ResponseEntity<byte[]> downloadSystem(@RequestParam("id") Integer id) throws IOException {
-        Paper paper = paperService.getOneById(id);
-        Paper systemPaper = paperService.getSystemPaperByType(paper.getPaperType());
-        String path = FileUtil.UPLOAD_PATH + systemPaper.getPaperPath();
-        File file = new File(path);
-        String paperTypeName;
-
-        Integer paperType = systemPaper.getPaperType();
-        if (paperType == PaperTypeConstant.COMPUTER_TECHNOLOGY) {
-            paperTypeName = "计科";
-        } else if (paperType == PaperTypeConstant.SOFTWARE_ENGINEERING) {
-            paperTypeName = "软工";
-        } else if (paperType == PaperTypeConstant.COMMUNICATION) {
-            paperTypeName = "通信";
-        } else {
-            paperTypeName = "电子";
-        }
-        return ResponseUtils.buildResponseEntity(file, paperTypeName + "系统论文.doc");
-    }*/
-
 
 }

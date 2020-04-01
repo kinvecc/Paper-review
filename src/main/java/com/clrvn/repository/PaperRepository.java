@@ -12,17 +12,12 @@ import java.util.List;
  * @author Clrvn
  * @description
  * @className PaperRepository
- * @date 2019-05-20 23:01
  */
 @Repository
-@SuppressWarnings("all")
-public interface PaperRepository extends JpaRepository<Paper, Integer> {
+public interface PaperRepository extends JpaRepository<Paper, Long> {
 
-    Page<Paper> findAllByUserIdAndIsSystemOrderByCreateTimeDesc(Pageable pageable, Integer userId, Boolean isSystem);
+    int removeById(Long id);
 
-    Page<Paper> findAllByIsSystemOrderByCreateTimeDesc(Pageable pageable, Boolean isSystem);
+    Page<Paper> findAllByPaperNameContainsOrderByPageViewDesc(Pageable pageable, String paperName);
 
-    int removeById(Integer id);
-
-    List<Paper> findAllByPaperType(Integer paperType);
 }

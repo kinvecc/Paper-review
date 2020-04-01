@@ -22,16 +22,30 @@
 				<span class="layui-breadcrumb">
             <a target="_top" th:href="@{/index}">首页</a>
           </span>
-        <a class="layui-btn layui-btn-small" onclick="location.reload()" style="line-height:1.6em;margin-top:3px;float:right" title="刷新">
+        <a class="layui-btn layui-btn-small" onclick="location.reload()"
+           style="line-height:1.6em;margin-top:3px;float:right" title="刷新">
             <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
     </div>
     <div class="layui-fluid" id="vmPaperList">
         <div class="layui-row layui-col-space15">
             <div class="layui-col-md12">
                 <div class="layui-card">
-                    <!--                    <div class="layui-card-body "></div>-->
+                    <div class="layui-card-body ">
+                        <form class="layui-form layui-col-space5" onsubmit="return false">
+                            <div class="layui-inline layui-show-xs-block">
+                                <input autocomplete="off" class="layui-input" name="paperName" placeholder="请输入"
+                                       type="text">
+                            </div>
+                            <div class="layui-inline layui-show-xs-block">
+                                <button @click="queryPaper()" class="layui-btn" lay-filter="search"><i
+                                        class="layui-icon"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                     <div class="layui-card-header">
-                        <button @click="removeSystem()" class="layui-btn" onclick="xadmin.open('上传论文','/paperAdd',500,300)"><i class="layui-icon"></i>添加
+                        <button @click="removeSystem()" class="layui-btn"
+                                onclick="xadmin.open('上传论文','/paperAdd',700,500)"><i class="layui-icon"></i>上传论文
                         </button>
                     </div>
                     <div class="layui-card-body ">
@@ -40,8 +54,10 @@
                             <tr>
                                 <th>序号</th>
                                 <th>论文名称</th>
-                                <th>论文类型</th>
+                                <th>论文作者</th>
+                                <th>关键词</th>
                                 <th>提交时间</th>
+                                <th>热度</th>
                                 <th>操作</th>
                             </tr>
                             </thead>
@@ -49,16 +65,16 @@
                             <tr v-for="(paper,index) in page.content">
                                 <td>{{index+1}}</td>
                                 <td>{{paper.paperName}}</td>
-                                <td v-if="paper.paperType == 1">计科</td>
-                                <td v-if="paper.paperType == 2">软工</td>
-                                <td v-if="paper.paperType == 3">通信</td>
-                                <td v-if="paper.paperType == 4">电子</td>
-                                <td v-text="paper.createTime"></td>
+                                <td>{{paper.author}}</td>
+                                <td>{{paper.keyword}}</td>
+                                <td v-text="paper.uploadTime"></td>
+                                <td>{{paper.pageView}}</td>
                                 <td class="td-manage ">
                                     <a @click="downloadReport(paper.id)" href="javascript:void(0);" title="下载报告">
                                         <i class="layui-icon"></i>
                                     </a>
-                                    <a @click="deletePaper(paper.id) " href="javascript:void(0);" style="margin: 0 10px" title="删除论文">
+                                    <a @click="deletePaper(paper.id) " href="javascript:void(0);" style="margin: 0 10px"
+                                       title="删除论文">
                                         <i class="layui-icon ">&#xe640;</i>
                                     </a>
                                     <a @click="downloadSystem(paper.id) " href="javascript:void(0);" title="下载系统论文">
@@ -67,7 +83,7 @@
                                 </td>
                             </tr>
                             <tr v-if="page.total == 0">
-                                <td colspan="6" style="text-align: center">暂无论文！</td>
+                                <td colspan="7" style="text-align: center">暂无论文！</td>
                             </tr>
                             </tbody>
                         </table>
@@ -78,14 +94,17 @@
                                 <a @click="getPage(0)" class="prev" href="javascript:void(0)" v-if="!page.first">
                                     首页
                                 </a>
-                                <a @click="getPage(page.number-1)" class="prev" href="javascript:void(0)" v-if="!page.first">
+                                <a @click="getPage(page.number-1)" class="prev" href="javascript:void(0)"
+                                   v-if="!page.first">
                                     上一页
                                 </a>
                                 <span @click="getPage(page.number)" class="current">{{page.number+1}} / {{page.totalPages}}</span>
-                                <a @click="getPage(page.number+1)" class="next" href="javascript:void(0)" v-if="!page.last">
+                                <a @click="getPage(page.number+1)" class="next" href="javascript:void(0)"
+                                   v-if="!page.last">
                                     下一页
                                 </a>
-                                <a @click="getPage(page.totalPages-1)" class="prev" href="javascript:void(0)" v-if="!page.last">
+                                <a @click="getPage(page.totalPages-1)" class="prev" href="javascript:void(0)"
+                                   v-if="!page.last">
                                     末页
                                 </a>
                             </div>
@@ -107,7 +126,7 @@
                 var _this = this;
                 var url = "/paper/findPaperPage";
 
-                $.getJSON(url, {"pageIndex": pageIndex, isSystem: false}, function (data) {
+                $.getJSON(url, {"pageIndex": pageIndex, paperName: null}, function (data) {
                     _this.page = data;
                 });
             },
@@ -147,6 +166,17 @@
             },
             removeSystem: function () {
                 sessionStorage.removeItem("IS_SYSTEM");
+            },
+            queryPaper: function () {
+                var _this = this;
+                var url = "/paper/findPaperPage";
+
+                $.getJSON(url, {
+                    "pageIndex": 0,
+                    paperName:  $("[name=paperName]").val().trim()
+                }, function (data) {
+                    _this.page = data;
+                });
             }
 
         },
