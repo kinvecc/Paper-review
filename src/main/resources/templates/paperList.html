@@ -32,8 +32,15 @@
                 <div class="layui-card">
                     <div class="layui-card-body ">
                         <form class="layui-form layui-col-space5" onsubmit="return false">
-                            <div class="layui-inline layui-show-xs-block">
-                                <input autocomplete="off" class="layui-input" name="paperName" placeholder="请输入"
+                            <div class="layui-input-inline layui-show-xs-block">
+                                <select name="contrller">
+                                    <option value="0">名称</option>
+                                    <option value="1">关键词</option>
+                                    <option value="2">全文</option>
+                                    <option value="3">作者</option>
+                                </select>
+                            </div>
+                            <div class="layui-inline layui-show-xs-block"><input autocomplete="off" class="layui-input" name="paperName" placeholder="请输入"
                                        type="text">
                             </div>
                             <div class="layui-inline layui-show-xs-block">
@@ -116,6 +123,9 @@
     </div>
 </div>
 <script charset="UTF-8" type="text/javascript">
+
+    layui.use(['form'],function() {});
+
     vm = new Vue({
         el: "#vmPaperList",
         data: {
