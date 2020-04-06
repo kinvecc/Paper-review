@@ -18,7 +18,7 @@ public class SignColorTest {
 
     public static void main(String[] args) {
         //加载Word文档
-        Document document = new Document("花木兰.docx");
+        Document document = new Document("童趣.docx");
         //查找所有需要高亮的文本
         /*BodyRegion
         document.findStringInLine()*/

@@ -99,7 +99,8 @@ public class PaperController {
             paper.setKeyword(keyword);
             paper.setUploadTime(new Date());
             paper.setPageView(0);
-            paper.setContent(uploadContent.getContent());
+            String docContent = uploadContent.getContent();
+            paper.setContent(docContent);
             paper.setPaperName(paperName);
             paper.setPaperPath(fileName);
 
@@ -153,18 +154,27 @@ public class PaperController {
             }
 
             System.err.println(JSON.toJSONString(result));
+            //重复的字数
+            int resultNum = 0;
             //标色
             for (Map.Entry<int[], List<String>> entry : result.entrySet()) {
                 int[] key = entry.getKey();
-                uploadContent.signText(key[0], key[1], entry.getValue(), Color.yellow);
+                List<String> text = entry.getValue();
+                //这个是其他段的内容，所以不是重复的
+                List<String> strings = uploadContent.signText(key[0], key[1], text, Color.yellow);
+                System.err.println("重复字数" + strings.stream().mapToInt(String::length).sum());
+                resultNum += strings.stream().mapToInt(String::length).sum();
             }
-            String returnPath = "报告" + UIDUtils.getUId() + ".docx";
+            String returnPath = "报告_" + UIDUtils.getUId() + ".docx";
             uploadContent.getDocument().saveToFile(FileUtil.UPLOAD_PATH + returnPath, FileFormat.Docx);
 
             paper.setReturnPath(returnPath);
-            int size = result.keySet().size();
+            /*int size = result.keySet().size();
             int paragraphNum = uploadContent.getParagraphNum();
-            double ratio = (double) size / paragraphNum;
+            double ratio = (double) size / paragraphNum;*/
+
+            // 重复的字数 / 文章总字数 = 重复率
+            double ratio = (double) resultNum / docContent.length();
             System.out.println("查重率：" + ratio);
             log.debug("==================================  比较完成，查重率： {} ================================== ", ratio);
             //如果查重率没有过，则不保存论文到数据库
@@ -174,8 +184,9 @@ public class PaperController {
                 model.addAttribute("IS_PASS", true);
             }
             model.addAttribute("returnPath", returnPath);
-            model.addAttribute("fileRatio", ratio);
+            model.addAttribute("fileRatio", ratio > 1 ? 1 : ratio);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new PaperException(ResultFailureEnum.UPLOAD_PAPER_FAILURE);
         }
         return "success";
@@ -196,8 +207,7 @@ public class PaperController {
     public ResponseEntity<byte[]> viewDocument(@RequestParam("id") Integer id) {
         try {
             Paper paper = paperService.getOneById(id);
-            //热度加1
-            paperService.addPageView(id);
+
             String path = FileUtil.UPLOAD_PATH + paper.getPaperPath();
 
             File file = new File(path);
@@ -206,6 +216,15 @@ public class PaperController {
             throw new PaperException(ResultFailureEnum.VIEW_PAPER_FAILURE);
         }
     }
+
+    @GetMapping("/addPageView")
+    @ResponseBody
+    public ResultVO addPageView(@RequestParam("id") Integer id) {
+        //热度加1
+        paperService.addPageView(id);
+        return ResultVOUtil.success();
+    }
+
 
     /**
      * 下载报告通过路径

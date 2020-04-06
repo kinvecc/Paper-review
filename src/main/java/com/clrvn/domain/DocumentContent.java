@@ -9,7 +9,6 @@ import lombok.Data;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -57,7 +56,7 @@ public class DocumentContent {
      * @param otherText 其他的文本
      * @param color     颜色
      */
-    public void signText(int sectionNum, int paragraphNum, List<String> otherText, Color color) {
+    public List<String> signText(int sectionNum, int paragraphNum, List<String> otherText, Color color) {
 
         Paragraph paragraph = this.document.getSections().get(sectionNum).getParagraphs().get(paragraphNum);
 
@@ -66,8 +65,12 @@ public class DocumentContent {
         List<String> stringList = compare(text, otherText);
         stringList.forEach(str -> {
             System.err.println("要找的是：" + str);
-            paragraph.find(str, false, false).getAsOneRange().getCharacterFormat().setHighlightColor(color);
+            try {
+                paragraph.find(str, false, false).getAsOneRange().getCharacterFormat().setHighlightColor(color);
+            } catch (Exception ignored) {
+            }
         });
+        return stringList;
     }
 
     /**
@@ -83,16 +86,11 @@ public class DocumentContent {
         List<String> str2List = new ArrayList<>();
 
         str2.forEach(str -> {
-            str2List.addAll(SegmentationAlgorithmUtil.segmentationAlgorithm(str1));
+            //这一步是分词，然后汇总
+            str2List.addAll(SegmentationAlgorithmUtil.segmentationAlgorithm(str));
         });
 
-        System.err.print("str1");
-        str1List.forEach(System.out::println);
-        System.err.print("str2");
-        str2List.forEach(System.out::println);
-        Collection<String> intersection = CollUtil.intersection(str1List, str2List);
-
-        return CollUtil.distinct(intersection);
+        return ((List<String>) CollUtil.intersection(str1List, CollUtil.distinct(str2List)));
     }
 
     /**

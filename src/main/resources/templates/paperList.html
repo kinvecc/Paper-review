@@ -172,6 +172,8 @@
                     });
             },
             viewDocument: function (id, paperPath) {
+                //发异步
+                $.getJSON("/paper/addPageView?id=" + id, function(){});
                 var originUrl = "http://127.0.0.1:9001/paper/viewDocument?id=" + id; //要预览文件的访问地址
                 var previewUrl = originUrl + '&fullfilename=' + paperPath;
                 window.open('http://127.0.0.1:8012/onlinePreview?url=' + encodeURIComponent(previewUrl));

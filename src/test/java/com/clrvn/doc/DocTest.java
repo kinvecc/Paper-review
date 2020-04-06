@@ -68,7 +68,7 @@ class DocTest extends ClrvnApplicationTests {
     @Test
     void textColor() {
         //加载Word文档
-        Document document = new Document("花木兰1.docx");
+        Document document = new Document("童趣.docx");
         //查找所有需要高亮的文本
         /*BodyRegion
         document.findStringInLine()*/
@@ -112,8 +112,8 @@ class DocTest extends ClrvnApplicationTests {
     @Test
     void twoPageCompare() {
 
-        List<String> uploadFile = FileUtil.getListByFile("花木兰1.docx");
-        List<String> dataFile = FileUtil.getListByFile("花木兰.docx");
+        List<String> uploadFile = FileUtil.getListByFile("童趣.docx");
+        List<String> dataFile = FileUtil.getListByFile("童趣.docx");
 
         uploadFile.forEach(str -> System.out.println("upload:" + str));
         dataFile.forEach(str -> System.out.println("data:" + str));
@@ -150,9 +150,9 @@ class DocTest extends ClrvnApplicationTests {
     @Test
     void paperReview() {
 
-        List<String> data1File = FileUtil.getListByFile("花木兰1.docx");
-        List<String> data2File = FileUtil.getListByFile("花木兰2.docx");
-        List<String> uploadFile = FileUtil.getListByFile("花木兰.docx");
+        List<String> data1File = FileUtil.getListByFile("童趣.docx");
+        List<String> data2File = FileUtil.getListByFile("童趣.docx");
+        List<String> uploadFile = FileUtil.getListByFile("童趣.docx");
 
         Map<Integer, Map<String, List<String>>> result = new HashMap<>(uploadFile.size());
 
@@ -203,7 +203,7 @@ class DocTest extends ClrvnApplicationTests {
         System.err.println(JSON.toJSONString(result));
 
         //得到结果之后，再编辑文档
-        Document uploadDoc = new Document("花木兰.docx");
+        Document uploadDoc = new Document("童趣.docx");
 
         int i = 0;
         for (Object o : uploadDoc.getSections()) {
@@ -219,7 +219,7 @@ class DocTest extends ClrvnApplicationTests {
     @Test
     void editDoc() {
         //得到结果之后，再编辑文档
-        Document uploadDoc = new Document("花木兰.docx");
+        Document uploadDoc = new Document("童趣.docx");
         TextRange[] textRanges = uploadDoc.getSections().get(0).getParagraphs().get(0).find("木兰", false, false)
                 .getRanges();
         for (TextRange textRange : textRanges) {
@@ -243,9 +243,9 @@ class DocTest extends ClrvnApplicationTests {
 
     @Test
     void compareTwoDocument() {
-        Document uploadDoc = new Document("花木兰.docx");
-        Document data1Doc = new Document("花木兰1.docx");
-        Document data2Doc = new Document("花木兰2.docx");
+        Document uploadDoc = new Document("童趣.docx");
+        Document data1Doc = new Document("童趣.docx");
+        Document data2Doc = new Document("童趣.docx");
 
         DocumentContent uploadContent = new DocumentContent(uploadDoc);
         DocumentContent data1Content = new DocumentContent(data1Doc);
@@ -314,8 +314,8 @@ class DocTest extends ClrvnApplicationTests {
 
 //        String str1 = "臣本布衣，躬耕于南阳";
 //        String str2 = "我本靓仔，躬耕在咸阳";
-        String str1 = "万里赴戎机百，军事气传金析，将军自菲薄，壮士十年归。";
-        String str2 = "万里赴戎机，关山度若飞。朔气传金析，寒光照铁衣。将军百战死，壮士十年归。";
+        String str1 = "我回忆儿童时";
+        String str2 = "我回忆儿童时,测试重复的";
         List<String> str1List = SegmentationAlgorithmUtil.segmentationAlgorithm(str1);
         List<String> str2List = SegmentationAlgorithmUtil.segmentationAlgorithm(str2);
 
@@ -323,6 +323,14 @@ class DocTest extends ClrvnApplicationTests {
         str2List.forEach(System.err::println);
         Collection<String> intersection = CollUtil.intersection(str1List, str2List);
 
+        CollUtil.distinct(intersection).forEach(System.out::println);
+    }
+
+    @Test
+    public void intersectionList(){
+        List<String> str1List = Arrays.asList("你好", "我也好", "不太好");
+        List<String> str2List = Arrays.asList("哈哈哈", "我也好", "我真的不太好");
+        Collection<String> intersection = CollUtil.intersection(str1List, str2List);
         CollUtil.distinct(intersection).forEach(System.out::println);
     }
 }
