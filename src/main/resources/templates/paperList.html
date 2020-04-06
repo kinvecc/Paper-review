@@ -33,15 +33,16 @@
                     <div class="layui-card-body ">
                         <form class="layui-form layui-col-space5" onsubmit="return false">
                             <div class="layui-input-inline layui-show-xs-block">
-                                <select name="contrller">
-                                    <option value="0">名称</option>
-                                    <option value="1">关键词</option>
-                                    <option value="2">全文</option>
-                                    <option value="3">作者</option>
+                                <select name="type">
+                                    <option value="paper_name">名称</option>
+                                    <option value="keyword">关键词</option>
+                                    <option value="content">全文</option>
+                                    <option value="author">作者</option>
                                 </select>
                             </div>
-                            <div class="layui-inline layui-show-xs-block"><input autocomplete="off" class="layui-input" name="paperName" placeholder="请输入"
-                                       type="text">
+                            <div class="layui-inline layui-show-xs-block"><input autocomplete="off" class="layui-input"
+                                                                                 name="str" placeholder="请输入"
+                                                                                 type="text">
                             </div>
                             <div class="layui-inline layui-show-xs-block">
                                 <button @click="queryPaper()" class="layui-btn" lay-filter="search"><i
@@ -63,7 +64,7 @@
                                 <th>论文名称</th>
                                 <th>论文作者</th>
                                 <th>关键词</th>
-                                <th>提交时间</th>
+                                <th>上传时间</th>
                                 <th>热度</th>
                                 <th>操作</th>
                             </tr>
@@ -74,17 +75,18 @@
                                 <td>{{paper.paperName}}</td>
                                 <td>{{paper.author}}</td>
                                 <td>{{paper.keyword}}</td>
-                                <td v-text="paper.uploadTime"></td>
+                                <td>{{paper.uploadTime}}</td>
                                 <td>{{paper.pageView}}</td>
                                 <td class="td-manage ">
-                                    <a @click="downloadReport(paper.id)" href="javascript:void(0);" title="下载报告">
+                                    <a @click="viewDocument(paper.id, paper.paperPath)" href="javascript:void(0);"
+                                       title="查看论文">
                                         <i class="layui-icon"></i>
                                     </a>
                                     <a @click="deletePaper(paper.id) " href="javascript:void(0);" style="margin: 0 10px"
                                        title="删除论文">
                                         <i class="layui-icon ">&#xe640;</i>
                                     </a>
-                                    <a @click="downloadSystem(paper.id) " href="javascript:void(0);" title="下载系统论文">
+                                    <a @click="downloadReport(paper.id) " href="javascript:void(0);" title="下载查重报告">
                                         <i class="layui-icon "></i>
                                     </a>
                                 </td>
@@ -124,7 +126,8 @@
 </div>
 <script charset="UTF-8" type="text/javascript">
 
-    layui.use(['form'],function() {});
+    layui.use(['form'], function () {
+    });
 
     vm = new Vue({
         el: "#vmPaperList",
@@ -145,7 +148,7 @@
                     function () {
                         //发异步删除数据
                         $.ajax({
-                            url: "/paper/removeById",
+                            url: "/paper/deleteById",
                             data: {
                                 id: id
                             },
@@ -168,14 +171,13 @@
 
                     });
             },
+            viewDocument: function (id, paperPath) {
+                var originUrl = "http://127.0.0.1:9001/paper/viewDocument?id=" + id; //要预览文件的访问地址
+                var previewUrl = originUrl + '&fullfilename=' + paperPath;
+                window.open('http://127.0.0.1:8012/onlinePreview?url=' + encodeURIComponent(previewUrl));
+            },
             downloadReport: function (id) {
                 window.location.href = "/paper/downloadReport?id=" + id;
-            },
-            downloadSystem: function (id) {
-                window.location.href = "/paper/downloadSystem?id=" + id;
-            },
-            removeSystem: function () {
-                sessionStorage.removeItem("IS_SYSTEM");
             },
             queryPaper: function () {
                 var _this = this;
@@ -183,7 +185,8 @@
 
                 $.getJSON(url, {
                     "pageIndex": 0,
-                    paperName:  $("[name=paperName]").val().trim()
+                    type: $("[name=type]").val(),
+                    str: $("[name=str]").val().trim()
                 }, function (data) {
                     _this.page = data;
                 });

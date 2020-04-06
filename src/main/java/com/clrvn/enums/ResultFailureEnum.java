@@ -12,10 +12,15 @@ public enum ResultFailureEnum {
     /**
      * 删除论文失败
      */
-    REMOVE_PAPER_FAILURE(2, "删除论文失败"),
+    VIEW_PAPER_FAILURE(1, "查看论文失败"),
 
     /**
      * 删除论文失败
+     */
+    REMOVE_PAPER_FAILURE(2, "删除论文失败"),
+
+    /**
+     * 上传论文失败
      */
     UPLOAD_PAPER_FAILURE(3, "上传论文失败"),
     ;

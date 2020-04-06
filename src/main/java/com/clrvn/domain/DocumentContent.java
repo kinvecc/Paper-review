@@ -101,5 +101,18 @@ public class DocumentContent {
     public int getParagraphNum() {
         return sectionContents.stream().mapToInt(ele -> ele.getParagraphs().size()).sum();
     }
+
+    /**
+     * 获取内容
+     */
+    public String getContent() {
+        StringBuilder stringBuilder = new StringBuilder();
+        this.sectionContents.forEach(sectionContent -> {
+            sectionContent.getParagraphs().forEach(paragraphContent -> {
+                stringBuilder.append(paragraphContent.getText());
+            });
+        });
+        return stringBuilder.toString();
+    }
 }
 

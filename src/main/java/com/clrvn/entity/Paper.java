@@ -16,11 +16,12 @@ public class Paper implements Serializable, Cloneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String author;
     private String paperName;
     private String keyword;
+    private String content;
     private String paperPath;
     private String returnPath;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

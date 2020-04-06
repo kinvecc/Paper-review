@@ -14,24 +14,6 @@ import javax.servlet.http.HttpSession;
 @Controller
 public class HelloController {
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
-
-    @GetMapping("/register")
-    public String register() {
-        return "register";
-    }
-
-    @GetMapping("loginOut")
-    public String loginOut(HttpSession session) {
-        session.removeAttribute("USER");
-        session.invalidate();
-        session.getServletContext().removeAttribute(session.getId());
-        return "login";
-    }
-
     @GetMapping("/index")
     public String index() {
         return "index";
@@ -51,16 +33,5 @@ public class HelloController {
     public String paperAdd() {
         return "paperAdd";
     }
-
-    @GetMapping("/userPaperManage")
-    public String userPaperManage() {
-        return "userPaperManage";
-    }
-
-    @GetMapping("/systemPaperManage")
-    public String systemPaperManage() {
-        return "systemPaperManage";
-    }
-
 
 }

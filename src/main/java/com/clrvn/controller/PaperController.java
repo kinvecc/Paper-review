@@ -9,14 +9,14 @@ import com.clrvn.entity.Paper;
 import com.clrvn.enums.ResultFailureEnum;
 import com.clrvn.exception.PaperException;
 import com.clrvn.service.IPaperService;
-import com.clrvn.utils.CosineSimilarityUtil;
-import com.clrvn.utils.FileUtil;
-import com.clrvn.utils.UIDUtils;
+import com.clrvn.utils.*;
+import com.clrvn.vo.ResultVO;
 import com.spire.doc.Document;
 import com.spire.doc.FileFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.*;
@@ -43,6 +44,8 @@ public class PaperController {
 
     @Value("${similarity.paragraph}")
     private Double paragraphSimilarity;
+    @Value("${similarity.file}")
+    private Double fileSimilarity;
 
     @PostMapping(value = "test")
     public String testUploadFile(@RequestParam(value = "file") MultipartFile file) throws IOException {
@@ -53,13 +56,12 @@ public class PaperController {
 
     @GetMapping("/findPaperPage")
     @ResponseBody
-    public Page<Paper> findPaperPage(Integer pageIndex, String paperName) {
-        log.info("pageIndex={}, paperName={}", pageIndex, paperName);
-        log.info("page={}", paperService.findAllByPaperNameContainsOrderByPageViewDesc(pageIndex, paperName));
-        if (paperName == null){
-            paperName = "%%";
+    public Page<Paper> findPaperPage(Integer pageIndex, String type, String str) throws IOException {
+        log.info("pageIndex={}, type={}, str={}", pageIndex, type, str);
+        if (str == null) {
+            return paperService.findByOrderByPageViewDesc(pageIndex);
         }
-        return paperService.findAllByPaperNameContainsOrderByPageViewDesc(pageIndex, paperName);
+        return paperService.findByEs(pageIndex, type, str);
     }
 
     /**
@@ -95,10 +97,9 @@ public class PaperController {
             Paper paper = new Paper();
             paper.setAuthor(author);
             paper.setKeyword(keyword);
-            paper.setReturnPath("");
             paper.setUploadTime(new Date());
             paper.setPageView(0);
-
+            paper.setContent(uploadContent.getContent());
             paper.setPaperName(paperName);
             paper.setPaperPath(fileName);
 
@@ -157,23 +158,73 @@ public class PaperController {
                 int[] key = entry.getKey();
                 uploadContent.signText(key[0], key[1], entry.getValue(), Color.yellow);
             }
+            String returnPath = "报告" + UIDUtils.getUId() + ".docx";
+            uploadContent.getDocument().saveToFile(FileUtil.UPLOAD_PATH + returnPath, FileFormat.Docx);
 
-            uploadContent.getDocument().saveToFile("完结" + System.currentTimeMillis() + ".docx", FileFormat.Docx);
-
+            paper.setReturnPath(returnPath);
             int size = result.keySet().size();
             int paragraphNum = uploadContent.getParagraphNum();
             double ratio = (double) size / paragraphNum;
             System.out.println("查重率：" + ratio);
-            log.debug("==================================  比较完成，查重率： {} ================================== ",ratio);
+            log.debug("==================================  比较完成，查重率： {} ================================== ", ratio);
+            //如果查重率没有过，则不保存论文到数据库
             //新增
-            Paper newPaper = paperService.savePaper(paper);
-
-            System.err.println(newPaper.getId());
-            model.addAttribute("id", newPaper.getId());
+            if (ratio <= fileSimilarity) {
+                paperService.savePaper(paper);
+                model.addAttribute("IS_PASS", true);
+            }
+            model.addAttribute("returnPath", returnPath);
+            model.addAttribute("fileRatio", ratio);
         } catch (Exception e) {
             throw new PaperException(ResultFailureEnum.UPLOAD_PAPER_FAILURE);
         }
         return "success";
+    }
+
+    @DeleteMapping("/deleteById")
+    @ResponseBody
+    public ResultVO deleteById(Integer id) {
+        try {
+            paperService.removePaperById(id);
+            return ResultVOUtil.success();
+        } catch (Exception ex) {
+            throw new PaperException(ResultFailureEnum.REMOVE_PAPER_FAILURE);
+        }
+    }
+
+    @GetMapping(value = "/viewDocument")
+    public ResponseEntity<byte[]> viewDocument(@RequestParam("id") Integer id) {
+        try {
+            Paper paper = paperService.getOneById(id);
+            //热度加1
+            paperService.addPageView(id);
+            String path = FileUtil.UPLOAD_PATH + paper.getPaperPath();
+
+            File file = new File(path);
+            return ResponseUtils.buildResponseEntity(file, paper.getPaperPath());
+        } catch (Exception ex) {
+            throw new PaperException(ResultFailureEnum.VIEW_PAPER_FAILURE);
+        }
+    }
+
+    /**
+     * 下载报告通过路径
+     */
+    @GetMapping("/downReturnReport")
+    public ResponseEntity<byte[]> downloadReport(@RequestParam("path") String path) throws IOException {
+        File file = new File(FileUtil.UPLOAD_PATH + path);
+        return ResponseUtils.buildResponseEntity(file, path);
+    }
+
+    /**
+     * 下载报告
+     */
+    @GetMapping("/downloadReport")
+    public ResponseEntity<byte[]> downloadReport(@RequestParam("id") Integer id) throws IOException {
+        Paper paper = paperService.getOneById(id);
+        String path = FileUtil.UPLOAD_PATH + paper.getReturnPath();
+        File file = new File(path);
+        return ResponseUtils.buildResponseEntity(file, paper.getReturnPath());
     }
 
 }

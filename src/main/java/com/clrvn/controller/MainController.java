@@ -36,7 +36,7 @@ public class MainController {
         //获取返回的数据
         try {
             //构建请求
-            Request request = new Request("POST", "/testdb/_search");
+            Request request = new Request("POST", "/es_paper/_search");
             JSONObject jsonRequestObject = new JSONObject();
 
             //构建source
